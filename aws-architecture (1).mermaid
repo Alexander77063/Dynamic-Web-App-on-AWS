@@ -1,0 +1,63 @@
+graph TB
+    subgraph "AWS Cloud"
+        subgraph "VPC"
+            subgraph "Public Subnet AZ1"
+                ALB["Application Load Balancer"]
+                NAT1["NAT Gateway 1"]
+            end
+            
+            subgraph "Public Subnet AZ2"
+                NAT2["NAT Gateway 2"]
+            end
+            
+            subgraph "Private Subnet AZ1"
+                EC2_1["EC2 Instance 1"]
+                ASG["Auto Scaling Group"]
+            end
+            
+            subgraph "Private Subnet AZ2"
+                EC2_2["EC2 Instance 2"]
+            end
+            
+            subgraph "Database Subnet AZ1"
+                RDS_PRIMARY["RDS Primary"]
+            end
+            
+            subgraph "Database Subnet AZ2"
+                RDS_STANDBY["RDS Standby"]
+            end
+            
+            IGW["Internet Gateway"]
+            EC2_CONNECT["EC2 Instance Connect Endpoint"]
+        end
+        
+        S3["S3 Bucket"]
+        R53["Route 53"]
+        ACM["Certificate Manager"]
+        CW["CloudWatch"]
+    end
+    
+    USERS["Users"] --> R53
+    R53 --> ALB
+    ALB --> EC2_1
+    ALB --> EC2_2
+    EC2_1 --> RDS_PRIMARY
+    EC2_2 --> RDS_PRIMARY
+    EC2_1 --> S3
+    EC2_2 --> S3
+    EC2_1 --> NAT1
+    EC2_2 --> NAT2
+    NAT1 --> IGW
+    NAT2 --> IGW
+    USERS --> IGW
+    ALB --> ACM
+    EC2_1 --> CW
+    EC2_2 --> CW
+    RDS_PRIMARY --> RDS_STANDBY
+    
+    classDef aws fill:#ff9900,stroke:#232f3e,stroke-width:2px;
+    classDef subnet fill:#4d27aa,stroke:#232f3e,stroke-width:2px,color:white;
+    classDef external fill:#d6d6d6,stroke:#232f3e,stroke-width:2px;
+    
+    class ALB,NAT1,NAT2,EC2_1,EC2_2,RDS_PRIMARY,RDS_STANDBY,S3,R53,ACM,CW,IGW,EC2_CONNECT,ASG aws;
+    class USERS external;
